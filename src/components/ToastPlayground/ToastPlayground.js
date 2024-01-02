@@ -2,6 +2,7 @@ import React from "react";
 
 import Button from "../Button";
 import ToastShelf from "../ToastShelf/ToastShelf";
+import { ToastContext } from "../ToastProvider/ToastProvider";
 
 import styles from "./ToastPlayground.module.css";
 
@@ -10,25 +11,14 @@ const VARIANT_OPTIONS = ["notice", "warning", "success", "error"];
 function ToastPlayground() {
   const [message, setMessage] = React.useState("");
   const [variant, setVariant] = React.useState(VARIANT_OPTIONS[0]);
-  const [toasts, setToasts] = React.useState([]);
+  const { createToast } = React.useContext(ToastContext);
 
   function handleCreateToast(event) {
     event.preventDefault();
-    setToasts([...toasts, { id: crypto.randomUUID(), message, variant }]);
+    createToast(message, variant);
     setMessage("");
     setVariant(VARIANT_OPTIONS[0]);
   }
-
-  // When message is changed, ToastPlayground re-renders causing a new handleDimiss function is created.
-  // We use useCallback here with toasts as dependency to "remember" handleDimiss
-  // and only update it whenever toasts array is modified.
-  const handleDismiss = React.useCallback(
-    (id) => {
-      const nextToasts = toasts.filter((toast) => toast.id !== id);
-      setToasts(nextToasts);
-    },
-    [toasts]
-  );
 
   return (
     <div className={styles.wrapper}>
@@ -37,7 +27,7 @@ function ToastPlayground() {
         <h1>Toast Playground</h1>
       </header>
 
-      <ToastShelf handleDismiss={handleDismiss}>{toasts}</ToastShelf>
+      <ToastShelf />
 
       <form className={styles.controlsWrapper} onSubmit={handleCreateToast}>
         <div className={styles.row}>
