@@ -18,18 +18,15 @@ const ICONS_BY_VARIANT = {
   error: AlertOctagon,
 };
 
-function Toast({ variant, children, handleDimiss }) {
+function Toast({ variant, children, handleDismiss }) {
   const Icon = ICONS_BY_VARIANT[variant];
-  
+
   return (
     <div className={`${styles.toast} ${styles[variant]}`}>
-      <div className={styles.iconContainer}>
-        {Icon && <Icon size={24} />}
-      </div>
-      <p className={styles.content}>
-        {children}
-      </p>
-      <button className={styles.closeButton} onClick={handleDimiss}>
+      <div className={styles.iconContainer}>{Icon && <Icon size={24} />}</div>
+      <p className={styles.content}>{children}</p>
+      {/* The handleDismiss here is not the same as the one passed from ToastPlayground to ToastShelf */}
+      <button className={styles.closeButton} onClick={handleDismiss}>
         <X size={24} />
         <VisuallyHidden>Dismiss message</VisuallyHidden>
       </button>

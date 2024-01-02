@@ -1,7 +1,7 @@
 import React from "react";
 
 import Button from "../Button";
-import Toast from "../Toast/Toast";
+import ToastShelf from "../ToastShelf/ToastShelf";
 
 import styles from "./ToastPlayground.module.css";
 
@@ -10,11 +10,25 @@ const VARIANT_OPTIONS = ["notice", "warning", "success", "error"];
 function ToastPlayground() {
   const [message, setMessage] = React.useState("");
   const [variant, setVariant] = React.useState(VARIANT_OPTIONS[0]);
-  const [isVisible, setIsVisible] = React.useState(false);
+  const [toasts, setToasts] = React.useState([]);
 
-  function handleDimiss() {
-    setIsVisible(false);
+  function handleCreateToast(event) {
+    event.preventDefault();
+    setToasts([...toasts, { id: crypto.randomUUID(), message, variant }]);
+    setMessage("");
+    setVariant(VARIANT_OPTIONS[0]);
   }
+
+  // When message is changed, ToastPlayground re-renders causing a new handleDimiss function is created.
+  // We use useCallback here with toasts as dependency to "remember" handleDimiss
+  // and only update it whenever toasts array is modified.
+  const handleDismiss = React.useCallback(
+    (id) => {
+      const nextToasts = toasts.filter((toast) => toast.id !== id);
+      setToasts(nextToasts);
+    },
+    [toasts]
+  );
 
   return (
     <div className={styles.wrapper}>
@@ -23,15 +37,9 @@ function ToastPlayground() {
         <h1>Toast Playground</h1>
       </header>
 
-      {isVisible && <Toast
-        variant={variant}
-        isVisible={isVisible}
-        handleDimiss={handleDimiss}
-      >
-        {message}
-      </Toast>}
+      <ToastShelf handleDismiss={handleDismiss}>{toasts}</ToastShelf>
 
-      <div className={styles.controlsWrapper}>
+      <form className={styles.controlsWrapper} onSubmit={handleCreateToast}>
         <div className={styles.row}>
           <label
             htmlFor="message"
@@ -75,10 +83,10 @@ function ToastPlayground() {
         <div className={styles.row}>
           <div className={styles.label} />
           <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            <Button onClick={() => setIsVisible(true)}>Pop Toast!</Button>
+            <Button>Pop Toast!</Button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
